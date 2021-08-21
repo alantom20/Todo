@@ -2,6 +2,7 @@ package com.chenhao.todo;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,6 +10,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.chenhao.todo.models.Task;
@@ -32,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private int REQUEST_ADD = 100;
     private TaskAdapter taskAdapter;
     private TaskGroupAdapter taskButtonAdapter;
+    private DrawerLayout drawer;
+    private ImageButton toc;
 
 
     @Override
@@ -45,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,AddActivity.class);
                 startActivityForResult(intent,REQUEST_ADD);
+            }
+        });
+        toc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.open();
             }
         });
     }
@@ -68,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewTasks.setAdapter(taskAdapter);
 
         add = findViewById(R.id.fab_add);
+        drawer = findViewById(R.id.drawer_layout);
+        toc = findViewById(R.id.button_toc);
 
 
     }
@@ -89,6 +102,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void addData(){
         taskButtons.add(new TaskGroup(10,"工作",1));
+        taskButtons.add(new TaskGroup(50,"工作",10));
+        taskButtons.add(new TaskGroup(50,"工作",20));
+        taskButtons.add(new TaskGroup(50,"工作",30));
+        taskButtons.add(new TaskGroup(50,"工作",40));
+        taskButtons.add(new TaskGroup(50,"工作",50));
         tasks.add(new Task("游泳"));
         tasks.add(new Task("打球"));
         tasks.add(new Task("買午餐"));

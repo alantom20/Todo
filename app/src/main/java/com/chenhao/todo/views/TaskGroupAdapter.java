@@ -33,8 +33,9 @@ public class TaskGroupAdapter extends RecyclerView.Adapter<TaskGroupAdapter.Task
         TaskGroup taskButton = taskButtons.get(position);
         holder.titleText.setText(taskButton.getTitle());
         holder.countText.setText(String.valueOf(taskButton.getTaskCount()));
-        holder.taskPr.setProgress(taskButton.getTaskProgress());
         holder.taskPr.setMax(taskButton.getTaskCount());
+        holder.taskPr.setProgress(taskButton.getTaskProgress());
+
 
 
     }
