@@ -1,49 +1,69 @@
 package com.chenhao.todo;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
+
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.chenhao.todo.models.Task;
+import com.chenhao.todo.data.Task;
+import com.chenhao.todo.data.TodoDatabase;
+import com.chenhao.todo.fragment.TaskGroupFragment;
 import com.chenhao.todo.models.TaskGroup;
 import com.chenhao.todo.views.TaskAdapter;
 import com.chenhao.todo.views.TaskGroupAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+
+
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private TextView name;
     private RecyclerView recyclerViewTaskButton;
-    private List<TaskGroup> taskButtons = new ArrayList<>();
-    private List<Task> tasks = new ArrayList<>();
     private RecyclerView recyclerViewTasks;
     private FloatingActionButton add;
     private int REQUEST_ADD = 100;
-    private TaskAdapter taskAdapter;
-    private TaskGroupAdapter taskButtonAdapter;
-    private DrawerLayout drawer;
-    private ImageButton toc;
+    private  TaskAdapter taskAdapter;
+    public static TaskGroupAdapter taskGroupAdapter;
+    public static DrawerLayout drawer;
+    private FloatingActionButton toc;
+    private ImageView avatar;
+    private String groupTitle = "待辦事項";
+
+
+    private  List<Task> tasks = new ArrayList<>();
+    public static List<TaskGroup> taskGroups = new ArrayList<>();
+
+
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        addData();
+
         findViews();
         add.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,10 +78,19 @@ public class MainActivity extends AppCompatActivity {
                 drawer.open();
             }
         });
+
+
     }
+
+
+
 
     private void findViews(){
         name = findViewById(R.id.text_name);
+
+        recyclerViewTasks = findViewById(R.id.recycler_tasks);
+        recyclerViewTasks.setHasFixedSize(true);
+        recyclerViewTasks.setLayoutManager(new LinearLayoutManager(this));
 
         recyclerViewTaskButton = findViewById(R.id.recycler_tasks_but);
         recyclerViewTaskButton.setHasFixedSize(true);
@@ -69,20 +98,43 @@ public class MainActivity extends AppCompatActivity {
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         linearLayoutManager.setStackFromEnd(false);
         recyclerViewTaskButton.setLayoutManager(linearLayoutManager);
-        taskButtonAdapter = new TaskGroupAdapter(taskButtons);
-        recyclerViewTaskButton.setAdapter(taskButtonAdapter);
 
-        recyclerViewTasks = findViewById(R.id.recycler_tasks);
-        recyclerViewTasks.setHasFixedSize(true);
-        recyclerViewTasks.setLayoutManager(new LinearLayoutManager(this));
-        taskAdapter = new TaskAdapter(tasks);
-        recyclerViewTasks.setAdapter(taskAdapter);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("看電影",groupTitle));
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("買牙刷","生活"));
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("狼人殺","桌遊"));
+
+                List<Task> taskList = TodoDatabase.getInstance(MainActivity.this).taskDao().findByGroup(groupTitle);
+                tasks.addAll(taskList);
+
+                List<TaskGroup> newList = TodoDatabase.getInstance(MainActivity.this).taskDao().getTaskGroupAll();
+                taskGroups.addAll(newList);
+
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        taskAdapter = new TaskAdapter(tasks,getApplicationContext());
+                        recyclerViewTasks.setAdapter(taskAdapter);
+
+                        taskGroupAdapter = new TaskGroupAdapter(taskGroups);
+                        recyclerViewTaskButton.setAdapter(taskGroupAdapter);
+                    }
+                });
+            }
+        }).start();
+
+
+
+
 
         add = findViewById(R.id.fab_add);
         drawer = findViewById(R.id.drawer_layout);
-        toc = findViewById(R.id.button_toc);
+        toc = findViewById(R.id.fab_toc);
+        avatar = findViewById(R.id.img_avatar);
 
-
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -91,26 +143,62 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode == REQUEST_ADD){
             if(resultCode == RESULT_OK){
                 String taskName = data.getStringExtra("taskName");
-                Log.d(TAG, "onActivityResult: " + taskName);
-                tasks.add(new Task(taskName));
-                taskAdapter.notifyDataSetChanged();
+                Task task = new Task(taskName,groupTitle);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TodoDatabase.getInstance(MainActivity.this).taskDao().insert(task);
+                        List<Task> newTasks = TodoDatabase.getInstance(MainActivity.this).taskDao().findByGroup(groupTitle);
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                tasks.clear();
+                                tasks.addAll(newTasks);
+                                taskAdapter.notifyDataSetChanged();
+
+                            }
+                        });
+                    }
+                }).start();
 
             }
         }
 
     }
 
-    private void addData(){
-        taskButtons.add(new TaskGroup(10,"工作",1));
-        taskButtons.add(new TaskGroup(50,"工作",10));
-        taskButtons.add(new TaskGroup(50,"工作",20));
-        taskButtons.add(new TaskGroup(50,"工作",30));
-        taskButtons.add(new TaskGroup(50,"工作",40));
-        taskButtons.add(new TaskGroup(50,"工作",50));
-        tasks.add(new Task("游泳"));
-        tasks.add(new Task("打球"));
-        tasks.add(new Task("買午餐"));
-        tasks.add(new Task("買機票"));
-        tasks.add(new Task("體檢"));
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        switch (item.getItemId()){
+            case R.id.nav_categories:
+                FragmentTransaction transaction = fragmentManager.beginTransaction().replace(R.id.fragment_container,
+                        new TaskGroupFragment());
+                transaction.commit();
+                break;
+            case R.id.nav_todo:
+                for (Fragment fragment : fragmentManager.getFragments()) {
+                    if(fragment != null)
+                        getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+                }
+                break;
+
+        }
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
+
+    @Override
+    public void onBackPressed() {
+        if(drawer.isDrawerOpen(GravityCompat.START)){
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+
+
+
 }

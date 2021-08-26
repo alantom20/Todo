@@ -1,43 +1,31 @@
 package com.chenhao.todo.models;
 
-
 public class TaskGroup {
-    int taskCount;
-    String title;
-    int taskProgress;
+    String taskGroup;
+    int total;
+    int isDone;
 
-    public TaskGroup(int taskCount, String title, int taskProgress) {
-        this.taskCount = taskCount;
-        this.title = title;
-        this.taskProgress = taskProgress;
+    public String getTaskGroup() {
+        return taskGroup;
     }
 
-
-
-    public int getTaskCount() {
-        return taskCount;
+    public void setTaskGroup(String taskGroup) {
+        this.taskGroup = taskGroup;
     }
 
-    public void setTaskCount(int taskCount) {
-        this.taskCount = taskCount;
+    public int getTotal() {
+        return total;
     }
 
-    public String getTitle() {
-        return title;
+    public void setTotal(int total) {
+        this.total = total;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public int getIsDone() {
+        return isDone;
     }
 
-    public int getTaskProgress() {
-        return taskProgress;
+    public void setIsDone(int isDone) {
+        this.isDone = isDone;
     }
-
-    public void setTaskProgress(int taskProgress) {
-        this.taskProgress = taskProgress;
-    }
-
-
-
 }

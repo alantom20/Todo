@@ -7,11 +7,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="kBackgroundColor">#344FA1</color>
+    <color name="kBackgroundColor">#F7F9FAFF</color>
     <color name="kTitleColor">#91ADFC</color>
-    <color name="kButtonColor">#031956</color>
+    <color name="kButtonColor">#FFFFFF</color>
     <color name="kProgressBarColor">#D0D0D0</color>
-    <color name="kPurpleLight">#EB05FF</color>
+    <color name="kCheckColor">#0869FD</color>
+    <color name="kTextColor">#1C2753</color>
 
 
 </resources>
