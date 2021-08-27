@@ -67,6 +67,7 @@ public class TaskGroupIconAdapter extends RecyclerView.Adapter<TaskGroupIconAdap
 
         public TaskGroupIconHolder(@NonNull View itemView) {
             super(itemView);
+
             countText = itemView.findViewById(R.id.text_tasks_total_square);
             titleText = itemView.findViewById(R.id.text_tasks_title_square);
             taskPr = itemView.findViewById(R.id.progressBar_task_square);

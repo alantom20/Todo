@@ -9,17 +9,22 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chenhao.todo.AddActivity;
 import com.chenhao.todo.R;
+import com.chenhao.todo.views.TaskAdapter;
+import com.chenhao.todo.views.TaskGroupAdapter;
 import com.chenhao.todo.views.TaskGroupIconAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 
 import static com.chenhao.todo.MainActivity.drawer;
-
+import static com.chenhao.todo.MainActivity.taskAdapter;
+import static com.chenhao.todo.MainActivity.taskGroupAdapter;
+import static com.chenhao.todo.MainActivity.taskGroups;
 
 
 public class TaskGroupFragment extends Fragment {
@@ -30,7 +35,6 @@ public class TaskGroupFragment extends Fragment {
     private RecyclerView recyclerView;
     private FloatingActionButton toc;
     private FloatingActionButton add;
-    private static TaskGroupIconAdapter taskGroupIconAdapter;
 
 
 
@@ -64,11 +68,12 @@ public class TaskGroupFragment extends Fragment {
     private void findViews(){
         toc = rootView.findViewById(R.id.fab_toc_fragment);
 
-      /*  recyclerView = rootView.findViewById(R.id.recycler_group);
+        recyclerView = rootView.findViewById(R.id.recycler_group);
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this.getContext(),2));
-        taskGroupIconAdapter = new TaskGroupIconAdapter(getFragmentManager(),getTaskGroups());
-        recyclerView.setAdapter(taskGroupIconAdapter);*/
+        TaskGroupAdapter taskGroupAdapter = new TaskGroupAdapter(taskGroups,getContext(),getFragmentManager());
+        recyclerView.setAdapter(taskGroupAdapter);
 
         add = rootView.findViewById(R.id.fab_add_group);
 

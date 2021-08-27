@@ -1,5 +1,6 @@
 package com.chenhao.todo.views;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,21 +8,41 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chenhao.todo.MainActivity;
 import com.chenhao.todo.R;
+import com.chenhao.todo.data.Task;
+import com.chenhao.todo.data.TodoDatabase;
 import com.chenhao.todo.models.TaskGroup;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import static com.chenhao.todo.MainActivity.setGroupTitle;
+import static com.chenhao.todo.MainActivity.taskAdapter;
+import static com.chenhao.todo.MainActivity.taskGroupAdapter;
+import static com.chenhao.todo.MainActivity.tasks;
 
 
 public class TaskGroupAdapter extends RecyclerView.Adapter<TaskGroupAdapter.TaskGroupHolder> {
 
 
-    List<TaskGroup> taskGroups;
+    private List<TaskGroup> taskGroups;
+    private Context context;
+    private FragmentManager fragmentManager;
 
-    public TaskGroupAdapter(List<TaskGroup> taskGroups) {
+    public TaskGroupAdapter(List<TaskGroup> taskGroups,Context context) {
         this.taskGroups = taskGroups;
+        this.context = context;
+    }
+
+    public TaskGroupAdapter(List<TaskGroup> taskGroups, Context context, FragmentManager fragmentManager) {
+        this.taskGroups = taskGroups;
+        this.context = context;
+        this.fragmentManager = fragmentManager;
     }
 
     @NonNull
@@ -38,6 +59,37 @@ public class TaskGroupAdapter extends RecyclerView.Adapter<TaskGroupAdapter.Task
         holder.titleText.setText(taskGroup.getTaskGroup());
         holder.taskPr.setMax(taskGroup.getTotal());
         holder.taskPr.setProgress(taskGroup.getIsDone());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CountDownLatch cdt = new CountDownLatch(1);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setGroupTitle(taskGroup.getTaskGroup());
+                        List<Task> newTasks = TodoDatabase.getInstance(context).taskDao().findByGroup(taskGroup.getTaskGroup());
+                        cdt.countDown();
+                        tasks.clear();
+                        tasks.addAll(newTasks);
+                        cdt.countDown();
+                    }
+                }).start();
+                try {
+                    cdt.await();
+                    taskAdapter.notifyDataSetChanged();
+                    if(fragmentManager != null){
+                        for (Fragment fragment : fragmentManager.getFragments()) {
+                            if(fragment != null)
+                                fragmentManager.beginTransaction().remove(fragment).commit();
+                        }
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
 
 
     }

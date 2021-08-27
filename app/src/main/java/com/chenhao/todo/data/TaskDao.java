@@ -30,8 +30,8 @@ public interface TaskDao {
     @Query("select taskGroup,COUNT(taskGroup) AS total , SUM(CASE WHEN isDone = 1 THEN 1 ELSE 0 END) AS isDone from Task GROUP BY taskGroup ")
     List<TaskGroup> getTaskGroupAll();
 
-    @Update()
-    void updateTask(Task task);
+    @Update(entity = Task.class)
+    void updateTask(TaskUpdate taskUpdate);
 }
 
 

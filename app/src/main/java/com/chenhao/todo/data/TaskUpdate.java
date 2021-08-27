@@ -11,19 +11,11 @@ public class TaskUpdate {
     public long id;
     @ColumnInfo(name = "isDone")
     private boolean isDone;
-    private String name;
 
-    public TaskUpdate(boolean isDone, String name) {
+
+    public TaskUpdate(long id, boolean isDone) {
+        this.id = id;
         this.isDone = isDone;
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public long getId() {

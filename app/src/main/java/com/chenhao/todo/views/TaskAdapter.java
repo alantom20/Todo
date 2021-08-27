@@ -12,16 +12,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.chenhao.todo.MainActivity;
 import com.chenhao.todo.R;
 import com.chenhao.todo.data.Task;
 import com.chenhao.todo.data.TaskUpdate;
 import com.chenhao.todo.data.TodoDatabase;
-
+import com.chenhao.todo.models.TaskGroup;
 
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
-
+import static com.chenhao.todo.MainActivity.taskAdapter;
+import static com.chenhao.todo.MainActivity.taskGroupAdapter;
+import static com.chenhao.todo.MainActivity.taskGroups;
 
 
 public class TaskAdapter extends  RecyclerView.Adapter<TaskAdapter.TaskHolder>{
@@ -65,27 +69,31 @@ public class TaskAdapter extends  RecyclerView.Adapter<TaskAdapter.TaskHolder>{
                 }
                 holder.taskCheckBox.setChecked(isDone);
                 tasks.get(position).setDone(isDone);
-
-
+                CountDownLatch cdt = new CountDownLatch(1);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                     //   TaskUpdate taskUpdate = new TaskUpdate(task.isDone(),task.getName());
-                        TodoDatabase.getInstance(context).taskDao().updateTask(task);
-
+                        TaskUpdate taskUpdate = new TaskUpdate(task.getId(),task.isDone());
+                        TodoDatabase.getInstance(context).taskDao().updateTask(taskUpdate);
+                        List<TaskGroup> newTaskGroups = TodoDatabase.getInstance(context).taskDao().getTaskGroupAll();
+                        taskGroups.clear();
+                        taskGroups.addAll(newTaskGroups);
+                        cdt.countDown();
                     }
                 }).start();
+                try {
+                    cdt.await();
+                    taskGroupAdapter.notifyDataSetChanged();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
 
             }
         });
 
 
-
-
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -96,7 +104,10 @@ public class TaskAdapter extends  RecyclerView.Adapter<TaskAdapter.TaskHolder>{
         CheckBox taskCheckBox;
         public TaskHolder(@NonNull View itemView) {
             super(itemView);
+
             taskCheckBox = itemView.findViewById(R.id.task_check_box);
         }
     }
+
+
 }

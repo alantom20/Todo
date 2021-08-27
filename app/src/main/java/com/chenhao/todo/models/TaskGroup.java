@@ -5,6 +5,8 @@ public class TaskGroup {
     int total;
     int isDone;
 
+
+
     public String getTaskGroup() {
         return taskGroup;
     }
@@ -28,4 +30,6 @@ public class TaskGroup {
     public void setIsDone(int isDone) {
         this.isDone = isDone;
     }
+
+
 }

@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chenhao.todo.data.Task;
+import com.chenhao.todo.data.TaskUpdate;
 import com.chenhao.todo.data.TodoDatabase;
 import com.chenhao.todo.fragment.TaskGroupFragment;
 import com.chenhao.todo.models.TaskGroup;
@@ -44,15 +45,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RecyclerView recyclerViewTasks;
     private FloatingActionButton add;
     private int REQUEST_ADD = 100;
-    private  TaskAdapter taskAdapter;
+    public static TaskAdapter taskAdapter;
     public static TaskGroupAdapter taskGroupAdapter;
     public static DrawerLayout drawer;
     private FloatingActionButton toc;
     private ImageView avatar;
-    private String groupTitle = "待辦事項";
 
 
-    private  List<Task> tasks = new ArrayList<>();
+
+    private static String groupTitle = "待辦事項";
+
+
+    public static List<Task> tasks = new ArrayList<>();
     public static List<TaskGroup> taskGroups = new ArrayList<>();
 
 
@@ -102,23 +106,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new Thread(new Runnable() {
             @Override
             public void run() {
-                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("看電影",groupTitle));
+               /* TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("看電影",groupTitle));
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("健身房",groupTitle));
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("吉他",groupTitle));
                 TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("買牙刷","生活"));
-                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("狼人殺","桌遊"));
+                TodoDatabase.getInstance(MainActivity.this).taskDao().insert(new Task("狼人殺","桌遊"));*/
 
-                List<Task> taskList = TodoDatabase.getInstance(MainActivity.this).taskDao().findByGroup(groupTitle);
-                tasks.addAll(taskList);
+                List<Task> newTasks = TodoDatabase.getInstance(MainActivity.this).taskDao().findByGroup(groupTitle);
+                tasks.addAll(newTasks);
 
-                List<TaskGroup> newList = TodoDatabase.getInstance(MainActivity.this).taskDao().getTaskGroupAll();
-                taskGroups.addAll(newList);
+                List<TaskGroup> newTaskGroups = TodoDatabase.getInstance(MainActivity.this).taskDao().getTaskGroupAll();
+                taskGroups.addAll(newTaskGroups);
 
                 runOnUiThread(new Runnable() {
                     public void run() {
                         taskAdapter = new TaskAdapter(tasks,getApplicationContext());
                         recyclerViewTasks.setAdapter(taskAdapter);
 
-                        taskGroupAdapter = new TaskGroupAdapter(taskGroups);
+                        taskGroupAdapter = new TaskGroupAdapter(taskGroups,getApplicationContext());
                         recyclerViewTaskButton.setAdapter(taskGroupAdapter);
+
                     }
                 });
             }
@@ -149,12 +156,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void run() {
                         TodoDatabase.getInstance(MainActivity.this).taskDao().insert(task);
                         List<Task> newTasks = TodoDatabase.getInstance(MainActivity.this).taskDao().findByGroup(groupTitle);
+                        List<TaskGroup> newTaskGroups = TodoDatabase.getInstance(MainActivity.this).taskDao().getTaskGroupAll();
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 tasks.clear();
+                                taskGroups.clear();
                                 tasks.addAll(newTasks);
+                                taskGroups.addAll(newTaskGroups);
                                 taskAdapter.notifyDataSetChanged();
-
+                                taskGroupAdapter.notifyDataSetChanged();
                             }
                         });
                     }
@@ -197,8 +207,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public void updateTaskGroup(){
+        new Thread(new Runnable() {
 
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    public void run() {
 
+                    }
+                });
+            }
+        }).start();
+    }
 
-
+    public static void setGroupTitle(String groupTitle) {
+        MainActivity.groupTitle = groupTitle;
+    }
 }
